@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/imeyer/go-utilities"
 	"github.com/influxdb/influxdb-go"
 	"log"
 	"os"
@@ -20,19 +21,6 @@ var influxdb_port = flag.Int("influxdb-port", 8086, "Port of InfluxDB server")
 var influxdb_username = flag.String("influxdb-username", "root", "Username to connect to InfluxDB server")
 var influxdb_password = flag.String("influxdb-password", "", "noop flag. Set INFLUXDB_PASSWORD environment variable instead.")
 var influxdb_database = flag.String("influxdb-database", "database", "Database on the InfluxDB server")
-
-func ReverseHostname(hostname string) string {
-
-	chunks := strings.Split(hostname, ".")
-
-	for i, j := 0, len(chunks)-1; i < j; i, j = i+1, j-1 {
-		chunks[i], chunks[j] = chunks[j], chunks[i]
-	}
-
-	reverse_hostname := strings.Join(chunks[2:], ".")
-
-	return reverse_hostname
-}
 
 func median(numbers []float64) int64 {
 	if len(numbers) == 0 {
@@ -81,7 +69,7 @@ func main() {
 		Database: *influxdb_database,
 	})
 
-	influxdb_hostname := fmt.Sprintf("%s.%s", MetricPrefix(*metric_prefix), ReverseHostname(hostname))
+	influxdb_hostname := fmt.Sprintf("%s.%s", MetricPrefix(*metric_prefix), hostnameutils.ReverseOffset(hostname, 2))
 
 	go func() {
 		for {
