@@ -40,7 +40,7 @@ func MetricPrefix(metric_prefix string) string {
 }
 
 func main() {
-	var memory_stats runtime.MemStats
+	var m runtime.MemStats
 
 	flag.Parse()
 
@@ -92,19 +92,19 @@ func main() {
 		case <-ticker.C:
 			median := median(data)
 			requests := len(data)
-			runtime.ReadMemStats(&memory_stats)
+			runtime.ReadMemStats(&m)
 			series := &influxdb.Series{
 				Name:    influxdb_hostname,
-				Columns: []string{"request_time_median", "requests", "go_HeapAlloc", "go_HeapIdle", "go_HeapReleased", "go_Alloc"},
+				Columns: []string{"request_time_median", "requests", "go_HeapIdle", "go_HeapReleased", "go_Alloc"},
 				Points: [][]interface{}{
-					[]interface{}{median, requests, memory_stats.HeapAlloc, memory_stats.HeapIdle, memory_stats.HeapReleased, memory_stats.Alloc},
+					[]interface{}{median, requests, m.HeapIdle, m.HeapReleased, m.Alloc},
 				},
 			}
 
 			if err := influxdb_client.WriteSeries([]*influxdb.Series{series}); err != nil {
 				log.Panicf("Could not write %v to %v: %v", series, influxdb_hostname, err)
 			}
-			log.Printf("Sent %s{%f, %f, %f, %f, %f, %f} to %s", influxdb_hostname, median, requests, memory_stats.HeapSys, memory_stats.HeapAlloc, memory_stats.HeapIdle, memory_stats.HeapReleased, memory_stats.Alloc, influxdb_host_port)
+			log.Printf("Sent %s{%f, %f, %f, %f, %f, %f} to %s", influxdb_hostname, median, requests, m.HeapSys, m.HeapAlloc, m.HeapIdle, m.HeapReleased, m.Alloc, influxdb_host_port)
 
 			data = data[:0]
 		case number := <-numbers:
