@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/imeyer/go-utilities"
-	"github.com/influxdb/influxdb-go"
+	"github.com/influxdb/influxdb/tree/master/client"
 	"log"
 	"os"
 	"runtime"
